@@ -1,0 +1,36 @@
+localepurge dpkg support
+------------------------
+
+Starting with version 1.15.8, dpkg supports --path-include and
+--path-exclude options to filter files out of packages during
+unpacking.  Thus localepurge (since 0.7.0) now has the option to
+generate a dpkg configuration file to exclude locale specific
+documentation for various packages.
+
+This new feature comes with a number of advantages and disadvantages.
+The pros are:
+
+ * It is supported by dpkg.
+   - And not some script rm'ing "random files".
+ * Less I/O and less space used during the upgrades.
+   - dpkg filters at unpackage time rather than after the files
+     have been installed.
+
+Noticable cons are:
+
+ * It cannot be used to purge locale files from already installed
+   packages.
+   - Though it will be fixed on next upgrade (or reinstall) of the
+     packages.
+ * dpkg may sometimes keep a symlink that has been requested for
+   removal.  (Seen in dpkg 1.16.2)
+   - Please refer to dpkg(1) for more information.
+     (see the --path-exclude option)
+ * Certain features of localepurge cannot/will not be supported
+   with this approach.  These features cannot be used while the
+   dpkg approach is in place.
+   - Verbose listing of files being removed.
+   - Display of free space reclaimed by localepurge.
+   - Warn/Keep of "new locales".  The dpkg approach will only keep
+     exactly the locales you requested and nothing more.
+

@@ -1,0 +1,83 @@
+#!/data/data/com.termux/files/usr/bin/sh
+
+set -e
+
+# first get all possible locales and create a full list of locale values:
+
+CONFIG_FILE="/data/data/com.termux/files/usr/etc/locale.nopurge"
+TEMPFILE="$(mktemp --suffix ".locales")"
+LOCALELIST=/data/data/com.termux/files/usr/var/cache/localepurge/localelist
+
+conf_has_key() {
+    local key="$1"
+
+    if [ -f "$CONFIG_FILE" ] && fgrep --quiet --line-regexp \
+             "$key" "$CONFIG_FILE"; then
+        echo "true"
+    else
+        echo "false"
+    fi
+}
+
+
+# for the purpose of presenting a ready made preselection at the very first
+# configuration, include already configured locales from locales package:
+
+LOCALEGEN="$(mktemp --suffix ".locale.gen")"
+
+if [ -f /data/data/com.termux/files/usr/etc/locale.gen ]; then
+    grep ^[a-z] /data/data/com.termux/files/usr/etc/locale.gen | cut -d" " -f1 > "$LOCALEGEN"
+    # add double character locale names from underscore variations
+	# for later preselection:
+    cut -d"_" -f1 "$LOCALEGEN" | sort -u >> "$LOCALEGEN"
+fi
+
+# if it already exists, include locales from /etc/locale.nopurge:
+
+if [ -f /data/data/com.termux/files/usr/etc/locale.nopurge ]; then
+    grep ^[a-z] /data/data/com.termux/files/usr/etc/locale.nopurge | cut -d" " -f1 >> "$LOCALEGEN"
+fi
+
+# add values from "$LOCALEGEN" to "$TEMPFILE":
+
+cat "$LOCALEGEN" >> "$TEMPFILE"
+
+# include locales supported by the locales package:
+
+if [ -f /data/data/com.termux/files/usr/share/i18n/SUPPORTED ]; then
+    grep ^[a-z] /data/data/com.termux/files/usr/share/i18n/SUPPORTED | cut -d' ' -f1 | sort -u >> "$TEMPFILE"
+fi
+
+# include locales from our previous localelist if it already exists:
+
+if [ -f "$LOCALELIST" ]; then
+    cat "$LOCALELIST" >> "$TEMPFILE"
+fi
+
+# include locales from newly added locales:
+NEWLOCALELIST="$LOCALELIST"-new
+
+if [ -f "$NEWLOCALELIST" ] && \
+   [ $(ps w -p "$PPID" | grep -c dpkg-reconfigure) = "1" ]; then
+    cat "$NEWLOCALELIST" >> "$TEMPFILE"
+    rm -f "$NEWLOCALELIST"
+fi
+
+# creating double character locale names from underscore variations:
+
+cut -d"_" -f1 "$TEMPFILE" | sort -u >> "$TEMPFILE"
+
+# save full list of locale values into locale list:
+
+if [ ! -f "$LOCALELIST" ]; then
+    if [ ! -d /data/data/com.termux/files/usr/var/cache/localepurge ]; then
+	    mkdir -m 755 /data/data/com.termux/files/usr/var/cache/localepurge
+    fi
+    sort -u "$TEMPFILE" > "$LOCALELIST"
+   else
+    mv "$LOCALELIST" "$LOCALELIST"-old
+    sort -u "$TEMPFILE" > "$LOCALELIST"
+fi 
+
+LOCALES=$(sort -u "$TEMPFILE" | tr '\n' ' ' \
+         | sed 's/\ /,\ /g' | sed 's/,\ $//g')

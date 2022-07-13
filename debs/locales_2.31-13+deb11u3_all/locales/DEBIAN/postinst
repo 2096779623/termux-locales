@@ -1,0 +1,72 @@
+#! /bin/sh
+set -e 
+
+# Files
+LG="/data/data/com.termux/files/usr/etc/locale.gen"
+EE="/data/data/com.termux/files/usr/etc/default/locale"
+
+# Sanitize environnement
+LC_ALL=zh_CN.UTF-8
+LANG=zh_CN.UTF-8
+
+if [ "$1" = configure ]; then
+    if [ "$SELECTED_LOCALES" = "All locales" ]; then
+        [ -e $LG ] && rm -f $LG
+        ln -s /data/data/com.termux/files/usr/share/i18n/SUPPORTED $LG
+    else
+        [ -L $LG ] && [ "$(readlink $LG)" = "/data/data/com.termux/files/usr/share/i18n/SUPPORTED" ] && rm -f $LG
+        if [ ! -e $LG ] ; then
+            cat > $LG << EOF
+# This file lists locales that you wish to have built. You can find a list
+# of valid supported locales at /usr/share/i18n/SUPPORTED, and you can add
+# user defined locales to /usr/local/share/i18n/SUPPORTED. If you change
+# this file, you need to rerun locale-gen.
+#
+
+EOF
+        fi
+
+        # Comment previous defined locales
+        sed -i -e 's/^ *[a-zA-Z]/# &/' $LG
+
+        # Get list of supported locales
+        if [ -f "/data/data/com.termux/files/usr/share/i18n/SUPPORTED" ] ; then
+            SUPPORTED_LOCALES="$(sed -e '/^[a-zA-Z]/!d' -e 's/ *$//g' /data/data/com.termux/files/usr/share/i18n/SUPPORTED /data/data/com.termux/files/usr/share/i18n/SUPPORTED | sort -u)"
+        else
+            SUPPORTED_LOCALES="$(sed -e '/^[a-zA-Z]/!d' -e 's/ *$//g' /data/data/com.termux/files/usr/share/i18n/SUPPORTED | sort -u)"
+        fi
+
+        # Make sure all locales exist in locales.gen
+        echo "$SUPPORTED_LOCALES" | while read locale ; do
+           if ! grep -q "^[# ]*$locale *\$" $LG; then 
+             echo "# $locale" >> $LG
+           fi
+        done
+
+        # Uncomment selected locales
+        echo "$SELECTED_LOCALES" | while read locale ; do
+            sed -i -e "0,/^[# ]*$locale *$/ s/^[# ]*$locale *$/$locale/" $LG
+        done
+    fi
+
+    # Update requested locales if locales-all is not installed
+    if dpkg-query -W -f='${db:Status-Abbrev}' locales-all 2>/dev/null | grep -q '^i' ; then
+        echo "locales-all installed, skipping locales generation"
+    else
+        locale-gen
+    fi
+
+    if ! [ -e $EE ] || [ -n "$DEBCONF_RECONFIGURE" ] ; then
+        # Remove previous definitions
+        update-locale --no-checks LANG
+
+        # Set default LANG environment variable
+        if [ -n "$DEFAULT_ENVIRONMENT" ] && [ "$DEFAULT_ENVIRONMENT" != "None" ]; then
+            update-locale "LANG=$DEFAULT_ENVIRONMENT"
+        fi
+    fi
+fi
+
+
+
+exit 0

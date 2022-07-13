@@ -1,0 +1,11 @@
+prefix=/data/data/com.termux/files/usr/glibc
+exec_prefix=/data/data/com.termux/files/usr/glibc
+libdir=/data/data/com.termux/files/usr/glibc/lib
+includedir=/data/data/com.termux/files/usr/glibc/include
+
+Name: uuid
+Description: Universally unique id library
+Version: 2.38.0
+Requires:
+Cflags: -I${includedir}/uuid
+Libs: -L${libdir} -luuid

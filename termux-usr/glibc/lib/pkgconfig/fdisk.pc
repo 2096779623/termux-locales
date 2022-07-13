@@ -1,0 +1,11 @@
+prefix=/data/data/com.termux/files/usr/glibc
+exec_prefix=/data/data/com.termux/files/usr/glibc
+libdir=/data/data/com.termux/files/usr/glibc/lib
+includedir=/data/data/com.termux/files/usr/glibc/include
+
+Name: fdisk
+Description: fdisk library
+Version: 2.38.0
+Requires.private: uuid blkid
+Cflags: -I${includedir}/libfdisk
+Libs: -L${libdir} -lfdisk

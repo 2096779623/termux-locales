@@ -1,0 +1,6 @@
+// Get rid of unneeded locale files after each package installation
+
+DPkg
+{
+Post-Invoke {"if [ -x /data/data/com.termux/files/usr/bin/localepurge ] && [ $(ps w -p $PPID | egrep -c '(remove|purge)') != 1 ]; then /data/data/com.termux/files/usr/bin/localepurge; else exit 0; fi";};
+};

@@ -1,0 +1,11 @@
+prefix=/data/data/com.termux/files/usr/glibc
+exec_prefix=${prefix}
+libdir=/data/data/com.termux/files/usr/glibc/lib
+includedir=${prefix}/include
+
+Name: fuse
+Description: Filesystem in Userspace
+Version: 2.9.9
+Libs: -L${libdir} -lfuse -pthread
+Libs.private:  
+Cflags: -I${includedir}/fuse -D_FILE_OFFSET_BITS=64

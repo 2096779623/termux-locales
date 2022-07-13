@@ -1,0 +1,36 @@
+#!/data/data/com.termux/files/usr/bin/sh
+
+set -e
+
+# Do the debhelper stuff immediately
+
+
+
+######################################################
+# Only act when we are called to configure the package
+if [ "$1" != "configure" ]; then
+    /data/data/com.termux/files/usr/share/localepurge/gen-dpkg-cfg.pl
+    exit 0
+fi
+
+##############################################
+# The debconf routine for creating $CONFIGFILE
+
+##############################################
+# Now deal with the configuration file
+CONFIGFILE=/data/data/com.termux/files/usr/etc/locale.nopurge
+TMPFILE=$(mktemp) || exit 1
+ 
+# Remove file on exit
+trap 'rm -f "$TMPFILE"' EXIT
+
+
+# Ensure permissions are sane
+if [ -f "$CONFIGFILE" ]; then
+  chown root: $CONFIGFILE
+  chmod 0644 $CONFIGFILE
+fi
+
+# generate the dpkg config file if necessary.
+/data/data/com.termux/files/usr/share/localepurge/gen-dpkg-cfg.pl
+

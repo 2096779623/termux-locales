@@ -1,0 +1,26 @@
+Package: localepurge
+Version: 0.7.3.10
+Architecture: all
+Maintainer: Miguel Figueiredo <elmig@debianpt.org>
+Installed-Size: 127
+Depends: locales, perl
+Section: admin
+Priority: optional
+Description: reclaim disk space by removing unneeded localizations
+ This package provides a script to recover disk space wasted for unneeded
+ locales, GNOME/KDE localizations and localized man pages. Depending on
+ the installation, it is possible to save hundreds of megabytes of disk
+ space taken up by localization you will most probably never have any
+ use for. It is run automatically upon completion of any APT installation
+ actions.
+ .
+ This tool is a hack which is *not* integrated with the system's
+ package management system and therefore is not for the faint of heart.
+ Its interference can provoke strange, but usually harmless, behavior in
+ programs related to apt/dpkg, such as dpkg-repack, reportbug, etc.
+ Responsibility for its usage and possible breakage of the system
+ therefore lies in the system administrator's hands.
+ .
+ Please do abstain from reporting any such bugs blaming localepurge if you
+ break the system by using it. If you don't know what you are doing and
+ can't handle any resulting breakage, you should not install this package.

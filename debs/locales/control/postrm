@@ -1,0 +1,21 @@
+#!/bin/sh
+set -e
+
+case "$1" in
+    purge)
+	rm -f /data/data/com.termux/files/usr/etc/locale.gen
+	rm -f /data/data/com.termux/files/usr/etc/default/locale
+	;;
+    *)
+    	;;
+esac
+
+# Automatically added by dh_installdebconf/13.3.4
+if [ "$1" = purge ] && [ -e /data/data/com.termux/files/usr/share/debconf/confmodule ]; then
+	. /data/data/com.termux/files/usr/share/debconf/confmodule
+	db_purge
+fi
+# End automatically added section
+
+
+exit 0

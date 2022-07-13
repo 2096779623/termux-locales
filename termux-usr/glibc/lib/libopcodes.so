@@ -1,0 +1,1 @@
+INPUT( /data/data/com.termux/files/usr/glibc/lib/libopcodes.a -lbfd )
